@@ -1,11 +1,19 @@
-import React from 'react'
+import React from 'react';
 
-function Option() {
+import classes from './Option.module.css';
+
+function Option({ displayName, value, multiselect, selected=false }) {
+	let checkbox = null;
+	if (multiselect) {
+		const className = selected ? classes.option__checkbox_checked : classes..option__checkbox;
+		checkbox = <div className={className} />
+	}
 	return (
-		<div>
-			
+		<div className={classes.option}>
+			<div>{checkbox}</div>
+			<span>{displayName}</span>
 		</div>
 	)
 }
 
-export default Option
+export default Option;

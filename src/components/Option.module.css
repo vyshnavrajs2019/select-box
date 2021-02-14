@@ -1,0 +1,22 @@
+.option {
+	display: flex;
+	width: 100%;
+	padding: 5px 10px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.option__checkbox,
+.option__checkbox_checked {
+	position: relative;
+	border: 1px solid #000;
+	height: 25px;
+	width: 25px;
+	border-radius: 2px;
+	background-color: #fff;
+}
+
+.option__checkbox_checked {
+	background-color: #000;
+}
