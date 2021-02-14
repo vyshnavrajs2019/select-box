@@ -1,0 +1,12 @@
+.select {
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	display: flex;
+}
+
+.select__dropdown {
+	position: absolute;
+	content: "";
+	border: 5px solid transparent;
+	border-top-color: #000;
+}
