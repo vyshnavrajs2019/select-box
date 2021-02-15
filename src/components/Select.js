@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import Checkbox from './Checkbox';
 import Option from './Option';
@@ -6,30 +6,49 @@ import classes from './Select.module.css';
 
 function Select({ label = "", search = true, multiselect = false, options = [] }) {
 	const [active, setActive] = useState(false);
+	const [query, setQuery] = useState("");
 	const [selectedItems, setSelectedItems] = useState([]);
 
 	const isSimpleArray = options.length === 0 || typeof options[0] === "string";
 	let mappedOptions;
 	if (isSimpleArray) {
-		mappedOptions = options.map(option => {
-			return { displayName: option, value: { displayName: option } }
+		mappedOptions = options.map((option, optionIndex) => {
+			return { optionIndex, displayName: option, value: { displayName: option } }
 		});
 	} else {
-		mappedOptions = options.map(option => {
-			return { displayName: option.title, value: { displayName: option.title, ...option } };
+		mappedOptions = options.map((option, optionIndex) => {
+			return { optionIndex, displayName: option.title, value: { displayName: option.title, ...option } };
 		});
 	}
+
+	const [menuOptions, setMenuOptions] = useState(mappedOptions);
 
 	const openDropdown = () => {
 		setActive(true);
 	}
 
-	const closeDropdown = () => {
+	const closeDropdown = useCallback(() => {
 		setActive(false);
-	}
+	}, []);
+
+	const onBodyClick = useCallback(() => {
+		closeDropdown();
+	}, [closeDropdown]);
+
+	useEffect(() => {
+		document.body.addEventListener('click', onBodyClick);
+		return () => {
+			document.body.removeEventListener('click', onBodyClick);
+		}
+	}, [onBodyClick]);
 
 	const onOptionClick = (optionIndex, value) => {
 		const item = selectedItems.find(_ => _.optionIndex === optionIndex);
+		if (!multiselect) {
+			setSelectedItems([{ optionIndex, value }]);
+			closeDropdown();
+			return; 
+		}
 		if (!item) {
 			setSelectedItems([ ...selectedItems, { optionIndex, value }]);
 		} else {
@@ -37,18 +56,34 @@ function Select({ label = "", search = true, multiselect = false, options = [] }
 		}
 	}
 
+	const onSelectAllClick = () => {
+		if (selectedItems.length === mappedOptions.length) {
+			setSelectedItems([]);
+			return;
+		}
+		setSelectedItems(mappedOptions.map((option, optionIndex) => {
+			return { optionIndex, value: option.value };
+		}));
+	}
+
+	const fliterItems = (e) => {
+		const v = e.target.value;
+		setQuery(v);
+		setMenuOptions(mappedOptions.filter(option => option.displayName.toLowerCase().includes(v.toLowerCase())));
+	}
+
 	let dropdown;
 	let element;
 	if (active) {
-		const optionsArray = mappedOptions.map((option, index) => <Option key={index} multiselect={multiselect} option={option} optionIndex={index} selectedItems={selectedItems} onOptionClick={onOptionClick} />);
+		const optionsArray = menuOptions.map((option) => <Option key={option.optionIndex} multiselect={multiselect} option={option} selectedItems={selectedItems} onOptionClick={onOptionClick} />);
 		let dropdownFooter;
 		let dropdownHeader;
 		if (multiselect) {
 			dropdownHeader = (
-				<div className={classes.select__dropdownHeader}><Checkbox /></div>
+				<div onClick={(e) => {e.stopPropagation();onSelectAllClick();}} className={classes.select__dropdownHeader}><Checkbox isTickMark={false} checked={selectedItems.length === mappedOptions.length} /></div>
 			);
 			dropdownFooter = (
-				<div className={classes.select__dropdownFooter}>
+				<div className={classes.select__dropdownFooter} onClick={(e) => {e.stopPropagation();}}>
 					<button onClick={() => setSelectedItems([])} className={classes.select__dropdownClearButton}>Clear</button>
 					<button onClick={closeDropdown} className={classes.select__dropdownSubmitButton}>Submit</button>
 				</div>
@@ -61,39 +96,24 @@ function Select({ label = "", search = true, multiselect = false, options = [] }
 				{dropdownFooter}
 			</div>
 		);
-		element = <input />
+		if (search) {
+			element = <input value={query} onChange={fliterItems} className={classes.select__search} placeholder="Search" />;
+		} else {
+			const elementContent = selectedItems.length ? `${label} - ${selectedItems.map(item => item.value.displayName).join(', ')}` : `${label}`;
+			element = <span className={classes.select__spanContent}>{elementContent}</span>
+		}
 	} else {
 		const elementContent = selectedItems.length ? `${label} - ${selectedItems.map(item => item.value.displayName).join(', ')}` : `${label}`;
 		element = (
 			<React.Fragment>
 				<span className={classes.select__spanContent}>{elementContent}</span>
 				<div className={classes.select__dropdownArrow} />
-				<div className={classes.select__overlay} onClick={openDropdown} />
 			</React.Fragment>
 		);
 	}
 
-	// const selectRef = useRef();
-
-	// const bodyEventHandler = useCallback((event) => {
-	// 	const target = event.target;
-	// 	const withinSelectRef = selectRef.current.contains(target);
-	// 	if (!withinSelectRef) {
-	// 	alert('close');
-	// 		console.log(selectRef.current, target);
-	// 		closeDropdown();
-	// 	}
-	// }, []);
-
-	// useEffect(() => {
-	// 	document.body.addEventListener('click', bodyEventHandler);
-	// 	return () => {
-	// 		document.body.removeEventListener('click', bodyEventHandler);
-	// 	}
-	// }, [bodyEventHandler]);
-
 	return (
-		<div className={classes.select}>
+		<div className={classes.select} onClick={(e) => {e.stopPropagation(); openDropdown();}}>
 			{element}
 			{dropdown}
 		</div>

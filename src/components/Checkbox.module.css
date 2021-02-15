@@ -1,5 +1,4 @@
-.checkbox,
-.checkbox_checked {
+.checkbox {
 	position: relative;
 	border: 1px solid #000;
 	height: 15px;
@@ -9,8 +8,12 @@
 	display: inline-flex;
 	margin-right: 10px;
 	cursor: pointer;
+	align-items: center;
+	justify-content: center;
+	padding: 2px;
 }
 
 .checkbox_checked {
 	background-color: #000;
+	fill: #fff;
 }
