@@ -1,17 +1,18 @@
 import React from 'react';
+import Checkbox from './Checkbox';
 
 import classes from './Option.module.css';
 
-function Option({ option, multiselect, selected=false }) {
+function Option({ option, optionIndex, multiselect, selectedItems, onOptionClick }) {
 	const { displayName, value } = option;
 	let checkbox = null;
+	const selected = selectedItems.find(item => item.optionIndex === optionIndex);
 	if (multiselect) {
-		const className = selected ? classes.option__checkbox_checked : classes.option__checkbox;
-		checkbox = <div className={className} />
+		checkbox = <Checkbox checked={selected} />
 	}
 	return (
-		<div className={classes.option}>
-			<div>{checkbox}</div>
+		<div className={selected ? classes.option_selected : classes.option} onClick={() => onOptionClick(optionIndex, value)}>
+			{checkbox}
 			<span>{displayName}</span>
 		</div>
 	)
