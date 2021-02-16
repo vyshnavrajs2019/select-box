@@ -9,6 +9,7 @@ function Select({ label = "", search = true, multiselect = false, options = [] }
 	const [query, setQuery] = useState("");
 	const [selectedItems, setSelectedItems] = useState([]);
 
+	// Covert input data array to a suitable form
 	const isSimpleArray = options.length === 0 || typeof options[0] === "string";
 	let mappedOptions;
 	if (isSimpleArray) {
@@ -34,14 +35,16 @@ function Select({ label = "", search = true, multiselect = false, options = [] }
 	const onBodyClick = useCallback(() => {
 		closeDropdown();
 	}, [closeDropdown]);
-
+	
+	// Binds a click event on the body on mounting the component
 	useEffect(() => {
 		document.body.addEventListener('click', onBodyClick);
 		return () => {
 			document.body.removeEventListener('click', onBodyClick);
 		}
 	}, [onBodyClick]);
-
+	
+	// Toggle option on click	
 	const onOptionClick = (optionIndex, value) => {
 		const item = selectedItems.find(_ => _.optionIndex === optionIndex);
 		if (!multiselect) {
@@ -65,13 +68,15 @@ function Select({ label = "", search = true, multiselect = false, options = [] }
 			return { optionIndex, value: option.value };
 		}));
 	}
-
+	
+	// Filter the options shown in the dropdown based on the search query
 	const fliterItems = (e) => {
 		const v = e.target.value;
 		setQuery(v);
 		setMenuOptions(mappedOptions.filter(option => option.displayName.toLowerCase().includes(v.toLowerCase())));
 	}
 
+	// Based on active state of dropdown the contents of dropdown and selectbox are decided	
 	let dropdown;
 	let element;
 	if (active) {
