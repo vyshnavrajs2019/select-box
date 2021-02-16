@@ -44,6 +44,13 @@ function Select({ label = "", search = true, multiselect = false, options = [] }
 		}
 	}, [onBodyClick]);
 	
+	// Clear selected options when multiselect is set to false
+	useEffect(() => {
+		if (multiselect === false && selectedItems.length > 1) {
+			setSelectedItems([]);
+		}
+	}, [multiselect]);
+	
 	// Toggle option on click	
 	const onOptionClick = (optionIndex, value) => {
 		const item = selectedItems.find(_ => _.optionIndex === optionIndex);
